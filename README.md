@@ -1,5 +1,6 @@
 # EFCore.NoLock
 
+![.NET Build & Test](https://github.com/TahaZahit/EFCore.NoLock/actions/workflows/dotnet.yml/badge.svg)
 [![NuGet](https://img.shields.io/nuget/v/EFCore.NoLock.svg)](https://www.nuget.org/packages/EFCore.NoLock)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/nuget/dt/EFCore.NoLock.svg)](https://www.nuget.org/packages/EFCore.NoLock)
