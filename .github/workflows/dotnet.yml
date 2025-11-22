@@ -1,4 +1,4 @@
-name: .NET Build & Test
+name: .NET Build, Test & Publish
 
 on:
   push:
@@ -7,22 +7,41 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
+    
+    permissions:
+      packages: write
+      contents: read
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
+
+      - name: Pack
+        if: github.event_name == 'push'
+        run: dotnet pack --configuration Release --no-build --output .
       
-    - name: Build
-      run: dotnet build --no-restore
+      - name: Push to GitHub Packages
+        if: github.event_name == 'push'
+        run: dotnet nuget push *.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --skip-duplicate
       
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      - name: Push to NuGet.org
+        if: github.event_name == 'push'
+        run: dotnet nuget push *.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
