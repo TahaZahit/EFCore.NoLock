@@ -15,7 +15,7 @@ Unlike simple regex-based solutions, this library uses the official **Microsoft.
 - **⚡ High Performance:** Implements smart caching (`ConcurrentDictionary`) to avoid re-parsing identical queries. The overhead is negligible after the first execution.
 - **📦 Easy to Use:** Simple `.WithNoLock()` extension method for `IQueryable`.
 - **🔄 Async Support:** Fully supports `ToListAsync`, `FirstOrDefaultAsync`, and other async operations.
-- **✅ Compatibility:** Works seamlessly with .NET 6, .NET 8, .NET 9 and .NET 10
+- **✅ Compatibility:** Works seamlessly with .NET 6, .NET 7, .NET 8, .NET 9 and .NET 10
 
 ## 📦 Installation
 
