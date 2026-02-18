@@ -15,4 +15,14 @@ public class SqlCaptureInterceptor : DbCommandInterceptor
         LastCommandText = command.CommandText;
         return base.ReaderExecuting(command, eventData, result);
     }
+
+    public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(
+        DbCommand command,
+        CommandEventData eventData,
+        InterceptionResult<DbDataReader> result,
+        CancellationToken cancellationToken = default)
+    {
+        LastCommandText = command.CommandText;
+        return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
+    }
 }

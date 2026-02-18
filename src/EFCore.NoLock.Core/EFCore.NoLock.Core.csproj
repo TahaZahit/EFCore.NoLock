@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <PackageId>EFCore.NoLock.Core</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Taha Zahit Hakyemez</Authors>
+        <Product>EFCore.NoLock.Core</Product>
+        <Copyright>Copyright © Taha Zahit Hakyemez 2025</Copyright>
+
+        <Description>Core SQL transformation engine for the EFCore.NoLock ecosystem. Provides shared, ORM-agnostic WITH (NOLOCK) hint injection using the official Microsoft.SqlServer.TransactSql.ScriptDom parser.</Description>
+        <PackageTags>EFCore;NoLock;SQLServer;ScriptDom;Core;Shared</PackageTags>
+
+        <PackageProjectUrl>https://github.com/TahaZahit/EFCore.NoLock</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/TahaZahit/EFCore.NoLock</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="170.128.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+</Project>

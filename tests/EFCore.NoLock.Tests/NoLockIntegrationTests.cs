@@ -1,3 +1,4 @@
+using EFCore.NoLock.Core;
 using EFCore.NoLock.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;

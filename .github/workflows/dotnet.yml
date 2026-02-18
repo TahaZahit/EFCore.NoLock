@@ -9,10 +9,24 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    
+
     permissions:
       packages: write
       contents: read
+
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "NoLock_Test123!"
+        ports:
+          - 11433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'NoLock_Test123!' -C -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
@@ -20,10 +34,21 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: |
+            9.0.x
+            10.0.x
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Seed Northwind Database
+        run: |
+          for i in {1..30}; do
+            /opt/mssql-tools18/bin/sqlcmd -S localhost,11433 -U sa -P 'NoLock_Test123!' -C -Q "SELECT 1" 2>/dev/null && break
+            echo "Waiting for SQL Server... ($i)"
+            sleep 2
+          done
+          /opt/mssql-tools18/bin/sqlcmd -S localhost,11433 -U sa -P 'NoLock_Test123!' -C -i tests/seed/northwind-seed.sql
 
       - name: Restore dependencies
         run: dotnet restore
@@ -37,11 +62,11 @@ jobs:
       - name: Pack
         if: github.event_name == 'push'
         run: dotnet pack --configuration Release --no-build --output .
-      
+
       - name: Push to GitHub Packages
         if: github.event_name == 'push'
         run: dotnet nuget push *.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --skip-duplicate
-      
+
       - name: Push to NuGet.org
         if: github.event_name == 'push'
         run: dotnet nuget push *.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

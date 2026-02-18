@@ -1,6 +1,6 @@
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace EFCore.NoLock;
+namespace EFCore.NoLock.Core;
 
 internal class WithNoLockVisitor : TSqlFragmentVisitor
 {

@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
 
         <PackageId>EFCore.NoLock</PackageId>
-        <Version>1.0.1</Version>
+        <Version>2.0.0</Version>
         <Authors>Taha Zahit Hakyemez</Authors>
         <Product>EFCore.NoLock</Product>
         <Copyright>Copyright © Taha Zahit Hakyemez 2025</Copyright>
@@ -34,8 +34,10 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" Condition="'$(TargetFramework)' == 'net6.0'"/>
+    </ItemGroup>
 
-        <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="170.128.0"/>
+    <ItemGroup>
+        <ProjectReference Include="..\EFCore.NoLock.Core\EFCore.NoLock.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
