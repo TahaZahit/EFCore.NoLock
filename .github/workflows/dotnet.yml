@@ -41,15 +41,6 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Seed Northwind Database
-        run: |
-          for i in {1..30}; do
-            /opt/mssql-tools18/bin/sqlcmd -S localhost,11433 -U sa -P 'NoLock_Test123!' -C -Q "SELECT 1" 2>/dev/null && break
-            echo "Waiting for SQL Server... ($i)"
-            sleep 2
-          done
-          /opt/mssql-tools18/bin/sqlcmd -S localhost,11433 -U sa -P 'NoLock_Test123!' -C -i tests/seed/northwind-seed.sql
-
       - name: Restore dependencies
         run: dotnet restore
 
