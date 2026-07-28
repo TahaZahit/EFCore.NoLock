@@ -7,11 +7,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
 
     permissions:
-      packages: write
+      packages: read
       contents: read
 
     services:
@@ -29,10 +29,10 @@ jobs:
           --health-retries 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
             9.0.x
@@ -52,12 +52,48 @@ jobs:
 
       - name: Pack
         if: github.event_name == 'push'
-        run: dotnet pack --configuration Release --no-build --output .
+        run: dotnet pack --configuration Release --no-build --output nuget-packages
+
+      - name: Upload packages
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-packages
+          path: nuget-packages/*.nupkg
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write   # let this job mint the OIDC token Trusted Publishing exchanges
+      packages: write   # push to GitHub Packages
+      contents: read
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v8
+        with:
+          name: nuget-packages
+          path: nuget-packages
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
 
       - name: Push to GitHub Packages
-        if: github.event_name == 'push'
-        run: dotnet nuget push *.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --skip-duplicate
+        run: dotnet nuget push "nuget-packages/*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --skip-duplicate
+
+      # Kept immediately before the push on purpose: the key nuget.org hands back
+      # is valid for one hour, and each OIDC token buys exactly one key.
+      - name: NuGet login (OIDC to short-lived key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: TahaZahit
 
       - name: Push to NuGet.org
-        if: github.event_name == 'push'
-        run: dotnet nuget push *.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "nuget-packages/*.nupkg" --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
