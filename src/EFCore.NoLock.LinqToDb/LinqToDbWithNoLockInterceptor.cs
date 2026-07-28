@@ -9,9 +9,10 @@ namespace EFCore.NoLock.LinqToDb;
 /// </summary>
 /// <remarks>
 /// <para>
-/// This interceptor hooks into LinqToDB's command pipeline. When a command contains the 
-/// <c>NOLOCK_MODE</c> tag (added by the <see cref="WithNoLockLinqToDbExtension.WithNoLock{T}"/> extension),
-/// it delegates to <see cref="NoLockSqlTransformer"/> to safely modify the SQL syntax tree.
+/// This interceptor hooks into LinqToDB's command pipeline. Every initialized command is handed to
+/// <see cref="NoLockSqlTransformer"/>, which safely modifies the SQL syntax tree only when the current
+/// async flow has been flagged by the <see cref="WithNoLockExtension.WithNoLock{T}"/> extension. That
+/// flag is consumed by the first command it affects, so only the immediately executed query changes.
 /// </para>
 /// <para>
 /// <b>Registration:</b> Add the interceptor to your <c>DataConnection</c> or <c>DataContext</c>:
