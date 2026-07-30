@@ -1,0 +1,15 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "EFCore.NoLock",
+  "description": "Applies the SQL Server WITH (NOLOCK) table hint to individual LINQ queries via a fluent .WithNoLock() API, for EF Core and LinqToDB.",
+  "excludeFolders": ["tests"],
+  "rules": [
+    "Calling .WithNoLock() alone does nothing. The interceptor must be registered first: options.UseSqlServer(cs).AddInterceptors(new WithNoLockInterceptor()). Without it the query runs normally and no hint is applied.",
+    "The interceptor type lives in the EFCore.NoLock namespace; the .WithNoLock() extension method lives in EFCore.NoLock.Core. Both usings are needed.",
+    "Install EFCore.NoLock for Entity Framework Core, or EFCore.NoLock.LinqToDb for LinqToDB. EFCore.NoLock.Core is the shared engine and arrives as a transitive dependency — do not install it directly.",
+    "SQL Server only. WITH (NOLOCK) is a T-SQL table hint and has no equivalent on other providers.",
+    "The hint is applied per query, not per DbContext. Chain .WithNoLock() on the IQueryable you want it on.",
+    "Works with async materialisation (ToListAsync, FirstOrDefaultAsync, and the rest).",
+    "NOLOCK permits dirty reads: uncommitted, missing, and duplicated rows are all possible. Use it for tolerant read paths, never for reads that back a write decision."
+  ]
+}
