@@ -8,7 +8,7 @@ namespace EFCore.NoLock.Tests.Helpers;
 public class NorthwindFixture : IAsyncLifetime
 {
     public const string ConnectionString =
-        "Server=localhost,11433;Database=Northwind;User Id=sa;Password=NoLock_Test123!;TrustServerCertificate=True;";
+        "Server=localhost,11433;Database=Northwind_EfCore;User Id=sa;Password=NoLock_Test123!;TrustServerCertificate=True;";
 
     private const string MasterConnectionString =
         "Server=localhost,11433;Database=master;User Id=sa;Password=NoLock_Test123!;TrustServerCertificate=True;";
@@ -31,7 +31,7 @@ public class NorthwindFixture : IAsyncLifetime
         // Create DB if not exists
         await using (var cmd = masterConn.CreateCommand())
         {
-            cmd.CommandText = "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'Northwind') CREATE DATABASE Northwind;";
+            cmd.CommandText = "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'Northwind_EfCore') CREATE DATABASE Northwind_EfCore;";
             await cmd.ExecuteNonQueryAsync();
         }
 

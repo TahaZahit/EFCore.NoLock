@@ -13,7 +13,7 @@ namespace EFCore.NoLock.Tests;
 public class NorthwindIntegrationTests(ITestOutputHelper output)
 {
     private const string ConnectionString =
-        "Server=localhost,11433;Database=Northwind;User Id=sa;Password=NoLock_Test123!;TrustServerCertificate=True;";
+        "Server=localhost,11433;Database=Northwind_EfCore;User Id=sa;Password=NoLock_Test123!;TrustServerCertificate=True;";
 
     [Fact]
     public async Task Should_Read_Products_With_NoLock()

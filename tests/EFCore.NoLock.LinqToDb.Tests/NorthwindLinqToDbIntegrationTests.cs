@@ -16,7 +16,7 @@ namespace EFCore.NoLock.LinqToDb.Tests;
 public class NorthwindLinqToDbIntegrationTests(ITestOutputHelper output)
 {
     private const string ConnectionString =
-        "Server=localhost,11433;Database=Northwind;User Id=sa;Password=NoLock_Test123!;TrustServerCertificate=True;";
+        "Server=localhost,11433;Database=Northwind_LinqToDb;User Id=sa;Password=NoLock_Test123!;TrustServerCertificate=True;";
 
     private static DataConnection CreateConnection()
     {
