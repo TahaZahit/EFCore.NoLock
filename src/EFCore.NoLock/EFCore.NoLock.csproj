@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
 
         <PackageId>EFCore.NoLock</PackageId>
-        <Version>2.0.0</Version>
+        <Version>2.1.0</Version>
         <Authors>Taha Zahit Hakyemez</Authors>
         <Product>EFCore.NoLock</Product>
         <Copyright>Copyright © Taha Zahit Hakyemez 2025</Copyright>

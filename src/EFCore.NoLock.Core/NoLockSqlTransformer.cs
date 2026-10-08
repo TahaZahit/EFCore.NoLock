@@ -10,7 +10,7 @@ namespace EFCore.NoLock.Core;
 /// <remarks>
 /// <para>
 /// This class is consumed by both the Entity Framework Core and LinqToDB interceptors.
-/// It checks the <see cref="WithNoLockExtension.IsEnabled"/> flag (set by <c>.WithNoLock()</c>)
+/// It checks for the <see cref="WithNoLockExtension.NoLockTag"/> query tag (added by <c>.WithNoLock()</c>)
 /// and uses <see cref="Microsoft.SqlServer.TransactSql.ScriptDom"/> for safe SQL parsing.
 /// A thread-safe cache avoids re-parsing identical queries.
 /// </para>
@@ -26,17 +26,19 @@ public static class NoLockSqlTransformer
     /// <param name="command">The database command whose SQL may be transformed.</param>
     public static void ApplyNoLock(DbCommand command)
     {
-        if (!WithNoLockExtension.IsEnabled)
+        var sql = command.CommandText;
+        if (string.IsNullOrWhiteSpace(sql))
             return;
 
-        if (string.IsNullOrWhiteSpace(command.CommandText))
+        // EF Core renders query tags as leading comment lines, so the marker is always near the
+        // start. Bound the scan to that prefix instead of the whole SQL to keep the per-command
+        // cost of untagged queries negligible.
+        // ponytail: 256-char prefix window; widen if a caller ever chains enough tags to push ours past it.
+        var scan = sql.Length < 256 ? sql.Length : 256;
+        if (sql.IndexOf(WithNoLockExtension.NoLockTag, 0, scan, StringComparison.Ordinal) < 0)
             return;
 
-        var newSql = SqlCache.GetOrAdd(command.CommandText, TransformSql);
-        command.CommandText = newSql;
-
-        // Consume the flag so subsequent queries are not affected
-        WithNoLockExtension.Reset();
+        command.CommandText = SqlCache.GetOrAdd(sql, TransformSql);
     }
 
     private static string TransformSql(string originalSql)

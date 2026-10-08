@@ -13,13 +13,14 @@ public class LinqToDbNoLockInterceptorTests(ITestOutputHelper testOutputHelper)
     /// to include WITH (NOLOCK) on all table references.
     /// </summary>
     [Fact]
-    public void Should_Inject_NoLock_When_Flag_Is_Enabled()
+    public void Should_Inject_NoLock_When_Tag_Is_Present()
     {
-        // ARRANGE
+        // ARRANGE — SQL carries the NoLock tag, as LinqToDB's TagQuery renders it (leading comment).
         var interceptor = new LinqToDbWithNoLockInterceptor();
         var command = new FakeDbCommand
         {
-            CommandText = """
+            CommandText = $"""
+                          /* {WithNoLockExtension.NoLockTag} */
                           SELECT [o].[Id], [o].[CustomerName], [o0].[Id], [o0].[OrderId], [o0].[Product]
                           FROM [Orders] AS [o]
                           LEFT JOIN [OrderLines] AS [o0] ON [o].[Id] = [o0].[OrderId]
@@ -30,8 +31,7 @@ public class LinqToDbNoLockInterceptorTests(ITestOutputHelper testOutputHelper)
 
         var originalSql = command.CommandText;
 
-        // ACT — Simulate calling .WithNoLock() before query execution
-        var dummyQuery = Array.Empty<object>().AsQueryable().WithNoLock();
+        // ACT
         var eventData = new CommandEventData();
         var result = interceptor.CommandInitialized(eventData, command);
 

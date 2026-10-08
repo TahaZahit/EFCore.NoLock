@@ -1,4 +1,3 @@
-using EFCore.NoLock.Core;
 using EFCore.NoLock.LinqToDb;
 using LinqToDB;
 using LinqToDB.Data;

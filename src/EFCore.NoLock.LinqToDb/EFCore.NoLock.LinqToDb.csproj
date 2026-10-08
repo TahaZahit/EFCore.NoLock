@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
 
         <PackageId>EFCore.NoLock.LinqToDb</PackageId>
-        <Version>1.0.0</Version>
+        <Version>1.1.0</Version>
         <Authors>Taha Zahit Hakyemez</Authors>
         <Product>EFCore.NoLock.LinqToDb</Product>
         <Copyright>Copyright © Taha Zahit Hakyemez 2025</Copyright>
