@@ -103,7 +103,9 @@ var products = db.GetTable<Product>()
 
 ## 🔍 How It Works (Before & After)
 
-When you use `.WithNoLock()`, the interceptor captures the generated SQL before it hits the database. It parses the SQL into an Abstract Syntax Tree (AST), identifies the physical tables, and injects the `WITH (NOLOCK)` hint to **every table** in the query.
+When you use `.WithNoLock()`, the hint is bound to the query itself via a tag marker (EF Core `TagWith` / LinqToDB `TagQuery`). The interceptor detects that tag in the generated SQL before it hits the database, parses the SQL into an Abstract Syntax Tree (AST), identifies the physical tables, and injects the `WITH (NOLOCK)` hint into **every table** in the query.
+
+Because the tag travels with the query, the hint is preserved through composition (`Select`, `SelectMany`, `Where`, …), through repeated executions of the same `IQueryable`, and through **every** command of an `AsSplitQuery` — not just the first one.
 
 **Example Scenario:**
 Fetching an `Order` and its related `OrderLines`.
