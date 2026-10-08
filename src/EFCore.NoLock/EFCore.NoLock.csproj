@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
 
         <PackageId>EFCore.NoLock</PackageId>
-        <Version>2.1.1</Version>
+        <Version>2.2.0</Version>
         <Authors>Taha Zahit Hakyemez</Authors>
         <Product>EFCore.NoLock</Product>
         <Copyright>Copyright © Taha Zahit Hakyemez 2025</Copyright>
@@ -29,11 +29,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" Condition="'$(TargetFramework)' == 'net6.0'"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" Condition="'$(TargetFramework)' == 'net6.0'"/>
     </ItemGroup>
 
     <ItemGroup>

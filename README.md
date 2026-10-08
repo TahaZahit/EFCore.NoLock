@@ -45,9 +45,21 @@ dotnet add package EFCore.NoLock.LinqToDb
 
 ## 💻 Usage — Entity Framework Core
 
-### 1\. Register the Interceptor
+### 1\. Register
 
-Add the `WithNoLockInterceptor` to your DbContext configuration in `Program.cs` or `Startup.cs`.
+Two mechanisms are available; pick one.
+
+**`UseNoLock()` — recommended.** Emits the hint while the SQL is generated, so `WITH (NOLOCK)` is part of the SQL EF Core produces and **appears in EF Core's own command logs** — no capturing interceptor needed to verify it. No SQL re-parsing at execution time.
+
+```csharp
+using EFCore.NoLock;
+
+services.AddDbContext<MyDbContext>(options =>
+    options.UseSqlServer(connectionString)
+           .UseNoLock());
+```
+
+**`WithNoLockInterceptor` — deprecated.** Rewrites the SQL at execution time via the ScriptDom parser. Kept only for cases where replacing the query SQL generator is not an option; prefer `UseNoLock()`. Note: the hint is applied after EF Core captures the command text for logging, so it will **not** show up in EF Core's command logs (the actual SQL sent to the database still carries it).
 
 ```csharp
 using EFCore.NoLock;
@@ -56,6 +68,8 @@ services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(connectionString)
            .AddInterceptors(new WithNoLockInterceptor()));
 ```
+
+> Both are per-query: the hint is applied only to queries marked with `.WithNoLock()`. Register only one.
 
 ### 2\. Apply to Queries
 
@@ -152,13 +166,24 @@ EFCore.NoLock.Core              ← Shared SQL transformation engine (ScriptDom 
 
 The core engine is ORM-agnostic. Each ORM package provides a thin interceptor that delegates SQL transformation to `EFCore.NoLock.Core`.
 
-## ⚙️ Performance & Architecture
+## ⚡ Performance
 
-Parsing SQL is an expensive operation. To ensure high performance in production environments:
+### `UseNoLock()` — no parsing, no cache
 
-1.  **Caching:** The library generates a unique key for every SQL query.
-2.  **Lookup:** If the query has been processed before, the transformed SQL is retrieved from a thread-safe `ConcurrentDictionary` (Cache).
-3.  **Result:** The heavy parsing logic (`ScriptDom`) runs **only once** per unique query. Subsequent calls are virtually instantaneous.
+The generator emits `WITH (NOLOCK)` **while EF Core is already generating the SQL**: it appends the hint inline as each table is visited (`VisitTable`). Two consequences follow:
+
+- **Nothing is re-parsed.** The hint is produced during EF Core's single, existing SQL-generation pass — `ScriptDom` is never invoked on this path. The cost is a few `Append(" WITH (NOLOCK)")` string writes.
+- **There is nothing to cache.** The generator runs as part of query *compilation*, and EF Core already caches compiled queries. The hint is baked into the SQL that EF Core caches, so the generator runs **once per unique query**, not once per execution — every repeated execution reuses the cached SQL for free.
+
+### `WithNoLockInterceptor` (deprecated) — why it needed a cache
+
+The interceptor runs on **every command execution** (`ReaderExecuting`), after EF Core has produced the final SQL string. It parses that string into a T-SQL syntax tree with `ScriptDom`, injects the hints, and regenerates the SQL. EF Core's compiled-query cache doesn't help here — it caches the SQL *before* the interceptor mutates it — so the interceptor fires on every execution and must keep **its own** thread-safe `ConcurrentDictionary` to avoid re-parsing identical SQL:
+
+1.  **Key:** a unique key per SQL string, with leading comments stripped so per-request tags (e.g. `cid`/`uid`) don't inflate the cache.
+2.  **Lookup:** previously transformed SQL is served straight from the cache.
+3.  **Result:** `ScriptDom` parses each unique query only once; subsequent executions hit the cache.
+
+`UseNoLock()` is preferred precisely because it does the work at the SQL-generation layer: it removes both the per-execution parse **and** the extra cache the interceptor had to carry.
 
 ## ⚠️ Important Considerations
 

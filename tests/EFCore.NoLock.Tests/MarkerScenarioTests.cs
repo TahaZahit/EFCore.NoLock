@@ -43,7 +43,7 @@ public class MarkerScenarioTests(ITestOutputHelper output)
         return (new NorthwindDbContext(options), spy);
     }
 
-    private static readonly Regex TableRef = new(@"\]\s+AS\s+\[\w+\]", RegexOptions.Compiled);
+    private static readonly Regex TableRef = new(@"(?:FROM|JOIN)\s+\[\w+\]\s+AS\s+\[\w+\]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private void AssertEveryTableHasNoLock(string sql)
     {

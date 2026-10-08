@@ -38,7 +38,43 @@ public static class NoLockSqlTransformer
         if (sql.IndexOf(WithNoLockExtension.NoLockTag, 0, scan, StringComparison.Ordinal) < 0)
             return;
 
-        command.CommandText = SqlCache.GetOrAdd(sql, TransformSql);
+        // Cache on the SQL with leading comments stripped. Callers often prepend per-request comment
+        // tags (APM/correlation ids, the NOLOCK marker itself); keying on the raw text would store one
+        // entry per user and let the cache grow unbounded. The transform drops all comments anyway, so
+        // the stripped text yields the identical result while collapsing that variance to one entry.
+        var key = StripLeadingComments(sql);
+        command.CommandText = SqlCache.GetOrAdd(key, TransformSql);
+    }
+
+    /// <summary>
+    /// Returns the SQL with any leading whitespace and line (<c>--</c>) or block (<c>/* */</c>)
+    /// comments removed. Cheap prefix scan — no full SQL parse.
+    /// </summary>
+    internal static string StripLeadingComments(string sql)
+    {
+        var i = 0;
+        var n = sql.Length;
+        while (i < n)
+        {
+            while (i < n && char.IsWhiteSpace(sql[i])) i++;
+            if (i + 1 < n && sql[i] == '-' && sql[i + 1] == '-')
+            {
+                i += 2;
+                while (i < n && sql[i] != '\n') i++;
+            }
+            else if (i + 1 < n && sql[i] == '/' && sql[i + 1] == '*')
+            {
+                i += 2;
+                while (i + 1 < n && !(sql[i] == '*' && sql[i + 1] == '/')) i++;
+                i += 2;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return i <= 0 ? sql : i >= n ? string.Empty : sql[i..];
     }
 
     private static string TransformSql(string originalSql)
